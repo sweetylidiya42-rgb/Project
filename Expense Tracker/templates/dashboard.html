@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+
+/* INSIGHTS */
+.insight-box{
+    padding:15px;
+    border-radius:10px;
+    font-weight:bold;
+    text-align:center;
+    margin-top:10px;
+}
+
+.good { background:#1cc88a; color:white; }
+.warning { background:#f6c23e; color:white; }
+.danger { background:#e74a3b; color:white; }
+
+/* NOTIFICATIONS */
+.notification{
+    padding:10px;
+    border-radius:8px;
+    margin:5px 0;
+    background:#ffeeba;
+    font-weight:bold;
+}
+
+/* EMPTY */
+.empty{
+    text-align:center;
+    padding:40px;
+    color:#888;
+}
+
+/* SUMMARY */
+.card-container{
+    display:flex;
+    gap:15px;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+}
+
+.summary-card{
+    flex:1;
+    min-width:250px;
+    text-align:center;
+}
+
+/* CHART CENTER */
+.chart-wrapper{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px 0;
+}
+
+#expenseChart{
+    max-width:350px;
+    max-height:350px;
+}
+
+/* TOPBAR ALIGN FIX */
+.top-extra{
+    display:flex;
+    align-items:center;
+    gap:15px;
+    justify-content:flex-end; /* pushes to same line */
+    margin-top:-45px; /* pulls it UP into header line */
+}
+
+</style>
+
+
+<!-- NOTIFICATIONS -->
+{% if notifications %}
+<div class="card">
+<h3>🔔 Notifications</h3>
+{% for note in notifications %}
+<div class="notification">{{ note }}</div>
+{% endfor %}
+</div>
+{% endif %}
+
+<!-- BUDGET -->
+<div class="card">
+<h3>Set Monthly Budget</h3>
+<form method="POST" action="/dashboard">
+<input type="number" name="budget" placeholder="Enter Budget ₹" required>
+<button class="primary-btn">Save</button>
+</form>
+</div>
+
+<!-- SUMMARY -->
+<div class="card-container">
+
+<div class="card summary-card">
+<h3>Total Budget</h3>
+<p>₹{{ total_budget }}</p>
+</div>
+
+<div class="card summary-card">
+<h3>Total Spent</h3>
+<p>₹{{ total_spent }}</p>
+</div>
+
+<div class="card summary-card">
+<h3>Remaining</h3>
+<p>₹{{ remaining }}</p>
+</div>
+
+</div>
+
+<!-- AI INSIGHTS -->
+<div class="card">
+<h3><i class="fa-solid fa-robot"></i> AI Insights</h3>
+
+{% if insights %}
+{% for i in insights %}
+{% if "exceeded" in i %}
+<div class="insight-box danger">{{ i }}</div>
+{% elif "Warning" in i %}
+<div class="insight-box warning">{{ i }}</div>
+{% else %}
+<div class="insight-box good">{{ i }}</div>
+{% endif %}
+{% endfor %}
+{% else %}
+<div class="insight-box good">No insights yet</div>
+{% endif %}
+
+</div>
+
+<!-- CHART -->
+<div class="card">
+
+<h3 style="text-align:center;">Expense by Category</h3>
+
+{% if labels and values and values|length > 0 %}
+
+<div class="chart-wrapper">
+<canvas id="expenseChart"
+data-labels='{{ labels | tojson }}'
+data-values='{{ values | tojson }}'>
+</canvas>
+</div>
+
+{% else %}
+
+<div class="empty">
+🧾 No expenses yet <br>
+Start adding your expenses!
+</div>
+
+{% endif %}
+
+</div>
+
+<!-- CHART -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+const canvas = document.getElementById("expenseChart");
+
+if(canvas){
+    const labels = JSON.parse(canvas.dataset.labels || "[]");
+    const values = JSON.parse(canvas.dataset.values || "[]");
+
+    if(labels.length && values.length){
+        new Chart(canvas, {
+            type: "doughnut",
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                    backgroundColor: [
+                        "#4e73df",
+                        "#1cc88a",
+                        "#f6c23e",
+                        "#e74a3b",
+                        "#36b9cc"
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "bottom"
+                    }
+                }
+            }
+        });
+    }
+}
+});
+</script>
+
+{% endblock %}

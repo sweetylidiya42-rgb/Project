@@ -1,0 +1,35 @@
+<div class="sidebar collapsed" id="sidebar">
+
+<!-- 🔥 TOGGLE BUTTON -->
+<div class="toggle-btn" id="toggleBtn">
+    <i class="fa-solid fa-bars"></i>
+</div>
+
+<h3>ExpenseHub 💵</h3>
+
+<a href="/dashboard" class="{% if request.path == '/dashboard' %}active{% endif %}">
+    <i class="fa-solid fa-chart-line"></i>
+    <span>Dashboard</span>
+</a>
+
+<a href="/expenses" class="{% if request.path == '/expenses' %}active{% endif %}">
+    <i class="fa-solid fa-wallet"></i>
+    <span>Expenses</span>
+</a>
+
+<a href="/categories" class="{% if request.path == '/categories' %}active{% endif %}">
+    <i class="fa-solid fa-tags"></i>
+    <span>Categories</span>
+</a>
+
+<a href="/analytics" class="{% if request.path == '/analytics' %}active{% endif %}">
+    <i class="fa-solid fa-chart-pie"></i>
+    <span>Analytics</span>
+</a>
+
+<a href="/goals" class="{% if request.path == '/goals' %}active{% endif %}">
+    <i class="fa-solid fa-bullseye"></i>
+    <span>Goals</span>
+</a>
+
+</div>

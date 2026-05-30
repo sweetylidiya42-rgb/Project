@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ExpenseHub 💵</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+
+   <h2 class="logo">ExpenseHub 💵</h2>
+
+    <a href="/dashboard"><i class="fa fa-home"></i> <span>Dashboard</span></a>
+    <a href="/expenses"><i class="fa fa-wallet"></i> <span>Expenses</span></a>
+    <a href="/categories"><i class="fa fa-tags"></i> <span>Categories</span></a>
+    <a href="/analytics"><i class="fa fa-chart-line"></i> <span>Analytics</span></a>
+    <a href="/goals"><i class="fa fa-bullseye"></i> <span>Goals</span></a>
+ <!-- ✅ COPYRIGHT -->
+    <div class="sidebar-footer">
+        CopyRights Reserved © 2026 ExpenseHub💵
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+<div class="topbar">
+
+<!-- LEFT: TITLE -->
+<h2>{% block title %}{% endblock %}</h2>
+
+<!-- RIGHT: EVERYTHING IN ONE LINE -->
+<div class="topbar-right">
+
+    <!-- MONTH FILTER -->
+    <form method="GET" action="/dashboard">
+        <select name="month" onchange="this.form.submit()">
+            <option value="">All Months</option>
+            <option value="01">Jan</option>
+            <option value="02">Feb</option>
+            <option value="03">Mar</option>
+            <option value="04">Apr</option>
+            <option value="05">May</option>
+            <option value="06">Jun</option>
+            <option value="07">Jul</option>
+            <option value="08">Aug</option>
+            <option value="09">Sep</option>
+            <option value="10">Oct</option>
+            <option value="11">Nov</option>
+            <option value="12">Dec</option>
+        </select>
+    </form>
+
+    <!-- WELCOME -->
+  <span>
+    Welcome, 
+    <b>{{ user['name'] if user else 'User' }}</b>
+</span>
+
+    <!-- THEME BUTTON -->
+    <button id="themeBtn" class="theme-toggle">
+        <i id="themeIcon" class="fa-solid fa-moon"></i>
+    </button>
+
+    <!-- LOGOUT -->
+    <a href="/logout" class="logout-btn">
+        Logout
+    </a>
+
+</div>
+
+</div>
+
+{% block content %}{% endblock %}
+
+</div>
+</div>
+
+<!-- JS -->
+<script src="{{ url_for('static', filename='main.js') }}"></script>
+
+</body>
+</html>

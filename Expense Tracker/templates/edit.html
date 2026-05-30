@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Edit Expense</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+.form-box{
+    max-width:500px;
+    margin:auto;
+}
+.label{
+    font-weight:bold;
+    margin-top:10px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="layout">
+
+{% include 'sidebar.html' %}
+
+<div class="main">
+
+<!-- TOPBAR -->
+<div class="topbar">
+<h2>Edit Expense</h2>
+
+<div style="display:flex;gap:10px;">
+<button id="themeToggle" class="theme-btn">
+<i id="themeIcon" class="fa-solid fa-moon"></i>
+</button>
+
+<a href="/expenses">
+<button class="primary-btn">⬅ Back</button>
+</a>
+
+<a href="/logout">
+<button class="logout-btn">Logout</button>
+</a>
+</div>
+</div>
+
+<!-- SUCCESS MESSAGE -->
+{% if request.args.get("msg") %}
+<div class="toast" style="display:block;">
+{{ request.args.get("msg") }}
+</div>
+{% endif %}
+
+<!-- FORM -->
+<div class="card form-box">
+
+<h3><i class="fa-solid fa-pen"></i> Update Expense</h3>
+
+<form method="POST" action="/update_expense/{{ expense['id'] }}">
+
+<div class="label">Title</div>
+<input type="text" name="title" value="{{ expense['title'] }}" required>
+
+<div class="label">Amount</div>
+<input type="number" step="0.01" name="amount" value="{{ expense['amount'] }}" required>
+
+<div class="label">Category</div>
+<select name="category" required>
+{% for cat in categories %}
+<option value="{{ cat['name'] }}"
+{% if cat['name'] == expense['category'] %}selected{% endif %}>
+{{ cat['name'] }}
+</option>
+{% endfor %}
+</select>
+
+<div class="label">Date</div>
+<input type="date" name="date" value="{{ expense['date'] }}" required>
+
+<div class="label">Payment Mode</div>
+<select name="payment" required>
+<option value="UPI" {% if expense['payment_mode']=="UPI" %}selected{% endif %}>UPI</option>
+<option value="Credit Card" {% if expense['payment_mode']=="Credit Card" %}selected{% endif %}>Credit Card</option>
+<option value="Debit Card" {% if expense['payment_mode']=="Debit Card" %}selected{% endif %}>Debit Card</option>
+<option value="Cash" {% if expense['payment_mode']=="Cash" %}selected{% endif %}>Cash</option>
+</select>
+
+<!-- 🔁 RECURRING -->
+<div style="margin-top:10px;">
+<label>
+<input type="checkbox" name="recurring"
+{% if expense['recurring'] == 1 %}checked{% endif %}>
+ Monthly Recurring
+</label>
+</div>
+
+<button type="submit" class="primary-btn" style="margin-top:15px;">
+Update Expense
+</button>
+
+</form>
+
+</div>
+
+</div>
+</div>
+
+<!-- DARK MODE -->
+<script>
+const toggleBtn = document.getElementById("themeToggle");
+const icon = document.getElementById("themeIcon");
+
+if(localStorage.getItem("theme")==="dark"){
+document.body.classList.add("dark-mode");
+icon.classList.replace("fa-moon","fa-sun");
+}
+
+toggleBtn.onclick = () => {
+document.body.classList.toggle("dark-mode");
+icon.classList.toggle("fa-sun");
+icon.classList.toggle("fa-moon");
+
+localStorage.setItem("theme",
+document.body.classList.contains("dark-mode") ? "dark" : "light");
+}
+</script>
+
+</body>
+</html>

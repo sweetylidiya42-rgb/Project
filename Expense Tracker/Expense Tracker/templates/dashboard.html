@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expense Tracker - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h3>Expense Tracker</h3>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/expenses">Expenses</a>
+        <a href="/categories">Categories</a>
+        <a href="/analytics">Analytics</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <h2>Dashboard</h2>
+            <div>
+                Welcome, <b>{{ username }}</b>
+                <a href="/logout">
+                    <button class="logout-btn">Logout</button>
+                </a>
+            </div>
+        </div>
+
+        <!-- CARDS -->
+        <div class="card-container">
+            <div class="card">
+                <h3>Total Budget</h3>
+                <p>₹{{ total_budget if total_budget else 0 }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Total Spent</h3>
+                <p>₹{{ total_spent if total_spent else 0 }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Remaining</h3>
+                <p>₹{{ remaining if remaining else 0 }}</p>
+            </div>
+        </div>
+
+        <!-- CHART -->
+        <div class="card">
+            <h3>Expense Distribution</h3>
+            <canvas id="expenseChart"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    const labels = JSON.parse('{{ labels | default([]) | tojson | safe }}');
+    const values = JSON.parse('{{ values | default([]) | tojson | safe }}');
+
+    const ctx = document.getElementById("expenseChart").getContext("2d");
+
+    new Chart(ctx, {
+        type: "doughnut",
+        data: {
+            labels: labels.length ? labels : ["No Data"],
+            datasets: [{
+                data: values.length ? values : [1],
+                backgroundColor: [
+                    "#4e73df",
+                    "#1cc88a",
+                    "#f6c23e",
+                    "#e74a3b",
+                    "#36b9cc"
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: "bottom"
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

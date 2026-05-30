@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Goals{% endblock %}
+
+{% block content %}
+
+<style>
+.progress{
+    height:12px;
+    background:#eee;
+    border-radius:10px;
+    overflow:hidden;
+    margin-top:10px;
+}
+
+.progress-bar{
+    height:100%;
+    background:#1cc88a;
+    width:0%;
+    transition:0.6s ease;
+}
+
+.empty{
+    text-align:center;
+    padding:20px;
+    color:#888;
+}
+
+.actions{
+    display:flex;
+    gap:10px;
+    margin-top:10px;
+}
+
+.edit-btn{
+    background:#f6c23e;
+    color:white;
+    padding:8px 12px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.primary-btn{
+    background:#4e73df;
+    color:white;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    width:100%;
+}
+
+.delete-btn{
+    background:#e74a3b;
+    color:white;
+    padding:8px 12px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
+}
+
+.delete-btn:hover{
+    background:#c0392b;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+</style>
+
+<!-- TARGET -->
+<div class="card">
+<h3>🎯 Goal Target</h3>
+
+{% if goal %}
+
+<p><b>Target:</b> ₹{{ goal["target"] }}</p>
+
+<form method="POST">
+<input type="number" name="target" placeholder="Edit Target ₹" required>
+<button type="submit" class="edit-btn">Update Target</button>
+</form>
+
+{% else %}
+
+<form method="POST">
+<input type="number" name="target" placeholder="Set Target ₹" required>
+<button type="submit" class="primary-btn">Save Target</button>
+</form>
+
+{% endif %}
+</div>
+
+<!-- SAVINGS -->
+<div class="card">
+<h3>💰 Savings</h3>
+
+{% if goal %}
+
+<p><b>Saved:</b> ₹{{ goal["saved"] }}</p>
+
+<form method="POST">
+<input type="number" name="amount" placeholder="Add Saving ₹" required>
+<button type="submit" class="primary-btn">Add Money</button>
+</form>
+
+<div class="actions">
+
+<!-- ✅ RESET GOAL -->
+<form action="/reset_goal" method="POST">
+    <button type="submit" class="delete-btn">Reset Goal</button>
+</form>
+
+</div>
+
+{% else %}
+<div class="empty">Set target first</div>
+{% endif %}
+
+</div>
+
+<!-- PROGRESS -->
+{% if goal %}
+<div class="card">
+
+<h3>Your Progress 📊</h3>
+
+{% set percent = (goal["saved"] / goal["target"] * 100) if goal["target"] > 0 else 0 %}
+
+<div class="progress">
+<div class="progress-bar" data-percent="{{ percent }}"></div>
+</div>
+
+<p style="margin-top:10px;">
+<b>{{ percent|int }}%</b> completed
+</p>
+
+</div>
+{% endif %}
+
+<!-- HISTORY -->
+<div class="card">
+<h3>Saving History 📜</h3>
+
+{% if history %}
+
+<table>
+<thead>
+<tr>
+<th>Amount</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+{% for h in history %}
+<tr>
+
+<td>₹{{ h["amount"] }}</td>
+<td>{{ h["date"] }}</td>
+
+<td>
+<!-- ✅ FIXED DELETE BUTTON -->
+<a href="/delete_saving/{{ h['id'] }}" class="delete-btn">
+    Delete
+</a>
+</td>
+
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% else %}
+<div class="empty">No savings yet</div>
+{% endif %}
+
+</div>
+
+<!-- SCRIPT -->
+<script>
+document.querySelectorAll(".progress-bar").forEach(bar => {
+    let value = bar.getAttribute("data-percent");
+
+    setTimeout(() => {
+        bar.style.width = value + "%";
+    }, 200);
+});
+</script>
+
+{% endblock %}

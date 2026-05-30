@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Expenses{% endblock %}
+
+{% block content %}
+
+<style>
+.form-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap:10px;
+}
+
+.badge{
+    padding:5px 10px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.upi{ background:#1cc88a; color:white; }
+.card-badge{ background:#4e73df; color:white; }
+.cash{ background:#f6c23e; color:white; }
+
+.alert{
+    padding:12px;
+    border-radius:8px;
+    margin-bottom:10px;
+    background:#1cc88a;
+    color:white;
+    font-weight:bold;
+}
+
+.empty{
+    text-align:center;
+    padding:30px;
+    color:#888;
+}
+
+.loader{
+    display:none;
+    text-align:center;
+    padding:20px;
+}
+
+/* MODAL */
+.modal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.6);
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+}
+
+.modal-content{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    text-align:center;
+    min-width:300px;
+}
+
+.modal-actions{
+    margin-top:15px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.confirm-delete{
+    background:#e74a3b;
+    color:white;
+    padding:8px 15px;
+    border-radius:6px;
+    text-decoration:none;
+}
+
+.confirm-delete:hover{
+    background:#c0392b;
+}
+
+.delete-btn{
+    background:#e74a3b;
+    color:white;
+    border:none;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.delete-btn:hover{
+    background:#c0392b;
+}
+</style>
+
+<!-- SUCCESS -->
+{% if request.args.get("msg") %}
+<div class="alert">
+✅ {{ request.args.get("msg") }}
+</div>
+{% endif %}
+
+
+<!-- SEARCH -->
+<div class="card">
+<h3>Search & Filter</h3>
+
+<form method="GET" action="/expenses" class="form-grid">
+
+<input type="text" name="search" placeholder="Search title or category"
+value="{{ request.args.get('search','') }}">
+
+<input type="date" name="date"
+value="{{ request.args.get('date','') }}">
+
+<select name="month">
+<option value="">Month</option>
+<option value="01" {% if request.args.get('month')=='01' %}selected{% endif %}>Jan</option>
+<option value="02" {% if request.args.get('month')=='02' %}selected{% endif %}>Feb</option>
+<option value="03" {% if request.args.get('month')=='03' %}selected{% endif %}>Mar</option>
+<option value="04" {% if request.args.get('month')=='04' %}selected{% endif %}>Apr</option>
+<option value="05" {% if request.args.get('month')=='05' %}selected{% endif %}>May</option>
+<option value="06" {% if request.args.get('month')=='06' %}selected{% endif %}>Jun</option>
+<option value="07" {% if request.args.get('month')=='07' %}selected{% endif %}>Jul</option>
+<option value="08" {% if request.args.get('month')=='08' %}selected{% endif %}>Aug</option>
+<option value="09" {% if request.args.get('month')=='09' %}selected{% endif %}>Sep</option>
+<option value="10" {% if request.args.get('month')=='10' %}selected{% endif %}>Oct</option>
+<option value="11" {% if request.args.get('month')=='11' %}selected{% endif %}>Nov</option>
+<option value="12" {% if request.args.get('month')=='12' %}selected{% endif %}>Dec</option>
+</select>
+
+<select name="payment">
+<option value="">Payment Mode</option>
+<option value="UPI" {% if request.args.get('payment')=='UPI' %}selected{% endif %}>UPI</option>
+<option value="Credit Card" {% if request.args.get('payment')=='Credit Card' %}selected{% endif %}>Credit Card</option>
+<option value="Debit Card" {% if request.args.get('payment')=='Debit Card' %}selected{% endif %}>Debit Card</option>
+<option value="Cash" {% if request.args.get('payment')=='Cash' %}selected{% endif %}>Cash</option>
+</select>
+
+<div style="display:flex; gap:10px;">
+<button type="submit" class="primary-btn">Apply</button>
+
+<a href="/expenses">
+<button type="button">Clear</button>
+</a>
+</div>
+
+</form>
+</div>
+
+<!-- ADD -->
+<div class="card">
+<h3>Add Expense</h3>
+
+<form method="POST" action="/add_expense" class="form-grid" id="addForm">
+
+<input type="text" name="title" placeholder="Expense Title" required>
+<input type="number" step="0.01" name="amount" placeholder="Amount" required>
+
+<select name="category" required>
+<option value="">Select Category</option>
+{% for cat in categories %}
+<option value="{{ cat['name'] }}">{{ cat['name'] }}</option>
+{% endfor %}
+</select>
+
+<input type="date" name="date" required>
+
+<select name="payment" required>
+<option value="">Payment Mode</option>
+<option value="UPI">UPI</option>
+<option value="Credit Card">Credit Card</option>
+<option value="Debit Card">Debit Card</option>
+<option value="Cash">Cash</option>
+</select>
+
+<label>
+<input type="checkbox" name="recurring"> Monthly Recurring
+</label>
+
+<button type="submit" class="primary-btn">Add</button>
+
+</form>
+</div>
+
+<div class="loader" id="loader">
+<i class="fa fa-spinner fa-spin"></i> Adding expense...
+</div>
+
+<!-- TABLE -->
+<div class="card">
+<h3>Your Expenses</h3>
+
+{% if expenses %}
+<table>
+<thead>
+<tr>
+<th>Title</th>
+<th>Amount</th>
+<th>Category</th>
+<th>Payment</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody>
+{% for expense in expenses %}
+<tr>
+
+<td>{{ expense['title'] }}</td>
+<td><b>₹{{ expense['amount'] }}</b></td>
+<td>{{ expense['category'] }}</td>
+
+<td>
+{% if expense["payment_mode"] == "UPI" %}
+<span class="badge upi">UPI</span>
+{% elif expense["payment_mode"] == "Cash" %}
+<span class="badge cash">Cash</span>
+{% else %}
+<span class="badge card-badge">{{ expense["payment_mode"] }}</span>
+{% endif %}
+</td>
+
+<td>{{ expense['date'] }}</td>
+
+<td style="display:flex;gap:8px;justify-content:center;">
+
+<a href="/edit_expense/{{ expense['id'] }}">
+<button type="button">✏️</button>
+</a>
+
+<button type="button" class="delete-btn" data-id="{{ expense['id'] }}">
+🗑
+</button>
+
+</td>
+
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% else %}
+<div class="empty">
+No expenses yet
+</div>
+{% endif %}
+
+</div>
+
+<!-- MODAL -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+
+    <h3>Are you sure you want to delete?</h3>
+
+    <div class="modal-actions">
+      <button onclick="closeModal()">Cancel</button>
+      <a id="deleteLink" class="confirm-delete">Delete</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+
+// LOADER
+document.getElementById("addForm").addEventListener("submit", function(){
+    document.getElementById("loader").style.display = "block";
+});
+
+// DELETE
+document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", function(){
+
+        const id = this.getAttribute("data-id");
+
+        if(!id) return;
+
+        document.getElementById("deleteLink").href = "/delete_expense/" + id;
+        document.getElementById("deleteModal").style.display = "flex";
+    });
+});
+
+// CLOSE
+function closeModal(){
+    document.getElementById("deleteModal").style.display = "none";
+}
+
+// CLICK OUTSIDE
+window.onclick = function(event){
+    const modal = document.getElementById("deleteModal");
+    if(event.target === modal){
+        modal.style.display = "none";
+    }
+};
+
+</script>
+
+{% endblock %}

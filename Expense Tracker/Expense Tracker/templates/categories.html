@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Categories - Expense Tracker</title>
+</head>
+<body>
+
+<h2>Manage Categories</h2>
+
+<form method="POST" action="/add_category">
+    <input type="text" name="name" placeholder="Add New Category" required>
+    <button type="submit">Add Category</button>
+</form>
+
+<hr>
+
+<ul>
+    {% for cat in categories %}
+        <li>
+            {{ cat[1] }}
+            <a href="/delete_category/{{ cat[0] }}">
+                <button style="background:red;color:white;">Delete</button>
+            </a>
+        </li>
+    {% endfor %}
+</ul>
+
+<br>
+<a href="/dashboard">Back to Dashboard</a>
+
+</body>
+</html>

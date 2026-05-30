@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics{% endblock %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+.chart-box{
+    height:320px;
+    max-width:500px;
+    margin:auto;
+}
+
+.insight-box{
+    padding:15px;
+    border-radius:10px;
+    margin-top:10px;
+    background:#f6c23e;
+    color:white;
+    font-weight:bold;
+    text-align:center;
+}
+</style>
+
+<!-- 📅 FILTER -->
+<div class="card">
+<h3>Filter by Month</h3>
+
+<form method="GET" action="/analytics">
+<select name="month">
+<option value="">All</option>
+<option value="01">Jan</option>
+<option value="02">Feb</option>
+<option value="03">Mar</option>
+<option value="04">Apr</option>
+<option value="05">May</option>
+<option value="06">Jun</option>
+<option value="07">Jul</option>
+<option value="08">Aug</option>
+<option value="09">Sep</option>
+<option value="10">Oct</option>
+<option value="11">Nov</option>
+<option value="12">Dec</option>
+</select>
+
+<button class="primary-btn">Apply</button>
+</form>
+</div>
+
+<!-- PIE CHART -->
+<div class="card">
+<h3><i class="fa-solid fa-chart-pie"></i> Category Distribution</h3>
+
+{% if labels %}
+<div class="chart-box">
+<canvas id="pieChart"
+data-labels='{{ labels | tojson }}'
+data-values='{{ values | tojson }}'></canvas>
+</div>
+{% else %}
+<p style="text-align:center;">No data available</p>
+{% endif %}
+</div>
+
+<!-- BAR CHART -->
+<div class="card">
+<h3><i class="fa-solid fa-chart-column"></i> Category Comparison</h3>
+
+{% if labels %}
+<div class="chart-box">
+<canvas id="barChart"
+data-labels='{{ labels | tojson }}'
+data-values='{{ values | tojson }}'></canvas>
+</div>
+{% else %}
+<p style="text-align:center;">No data available</p>
+{% endif %}
+</div>
+
+<!-- INSIGHTS -->
+<div class="card">
+<h3>💡 Smart Insights</h3>
+
+{% if labels %}
+{% set max_value = values|max %}
+{% set max_index = values.index(max_value) %}
+{% set max_category = labels[max_index] %}
+
+<div class="insight-box">
+📊 Highest spending: {{ max_category }}
+</div>
+
+<div class="insight-box" style="background:#1cc88a;">
+💡 Try reducing expenses in {{ max_category }}
+</div>
+
+{% else %}
+<p style="text-align:center;">No insights yet</p>
+{% endif %}
+</div>
+
+<!-- CHART SCRIPT -->
+<script>
+const pieCanvas = document.getElementById("pieChart");
+if(pieCanvas){
+    const labels = JSON.parse(pieCanvas.dataset.labels || "[]");
+    const values = JSON.parse(pieCanvas.dataset.values || "[]");
+
+    new Chart(pieCanvas, {
+        type: "pie",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: values,
+                backgroundColor: ["#4e73df","#1cc88a","#f6c23e","#e74a3b","#36b9cc"]
+            }]
+        }
+    });
+}
+
+const barCanvas = document.getElementById("barChart");
+if(barCanvas){
+    const labels = JSON.parse(barCanvas.dataset.labels || "[]");
+    const values = JSON.parse(barCanvas.dataset.values || "[]");
+
+    new Chart(barCanvas, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Expenses",
+                data: values,
+                backgroundColor: "#4e73df"
+            }]
+        }
+    });
+}
+</script>
+
+{% endblock %}

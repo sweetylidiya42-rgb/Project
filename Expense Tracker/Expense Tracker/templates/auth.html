@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Expense Tracker - Login & Signup</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body style="background: linear-gradient(to right,#4e73df,#1cc88a); height:100vh; display:flex; justify-content:center; align-items:center;">
+
+<div class="auth-container">
+
+    <!-- Optional Message Display -->
+    {% if error %}
+        <p style="color:red; text-align:center;">{{ error }}</p>
+    {% endif %}
+
+    {% if success %}
+        <p style="color:green; text-align:center;">{{ success }}</p>
+    {% endif %}
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+        <h2>Login</h2>
+
+        <form method="POST" action="/login">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" class="primary-btn">Login</button>
+        </form>
+
+        <div style="text-align:center; margin-top:10px;">
+            Don't have an account?
+            <a href="#" onclick="showSignup()">Sign Up</a>
+        </div>
+    </div>
+
+    <!-- SIGNUP FORM -->
+    <div id="signupForm" style="display:none;">
+        <h2>Sign Up</h2>
+
+        <form method="POST" action="/signup">
+            <input type="text" name="name" placeholder="Full Name" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit" class="primary-btn">Sign Up</button>
+        </form>
+
+        <div style="text-align:center; margin-top:10px;">
+            Already have an account?
+            <a href="#" onclick="showLogin()">Login</a>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function showSignup(){
+        document.getElementById("loginForm").style.display="none";
+        document.getElementById("signupForm").style.display="block";
+    }
+
+    function showLogin(){
+        document.getElementById("signupForm").style.display="none";
+        document.getElementById("loginForm").style.display="block";
+    }
+</script>
+
+</body>
+</html>
